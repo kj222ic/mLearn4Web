@@ -123,9 +123,11 @@ class dbConnector
                         VALUES ('$accID','$roleID')";
         return mysql_query($sql);
     }
-    /*
+
+
+    /********************************
      * EXAMPLES
-     */
+     ******************************/
 
     private function getCategoryAll(){
         $retArray = array();

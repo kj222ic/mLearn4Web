@@ -12,13 +12,31 @@ class mLearn4WebAPI {
     /**
      * @return string
      */
-    public static function getApi(){return self::$api;}
+    private static function getApi(){return self::$api;}
 
-    private function doCall($method,$param = null){
-        return file_get_contents($this->getApi().$method."/".$param);
+    public function doCall($method,$param = null){
+        return json_decode(file_get_contents($this->getApi().$method."/".$param));
     }
 
-    public function getMediaFromScenario($id){
-        $this->doCall("get",$id);
+   /* public function getMediaFromScenario($id){
+        $this->doCall("getalldata",$id);
+    }*/
+
+    public function getScenarios(){
+        return $this->doCall("getall");
+    }
+
+    public function getScenario($id){
+        return $this->doCall("get",$id);
+    }
+
+    public function getAllDataFromScenario(){
+        return $this->doCall("getalldata");
+    }
+
+    public function getDataFromScenario($id){
+        return $this->doCall("getscenariodata",$id);
+    }
+    public function __construct(){
     }
 } 

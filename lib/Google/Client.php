@@ -43,9 +43,10 @@ class Google_Client
    * @var Google_Cache_Abstract $cache
    */
   private $cache;
-
+// Scopes requested by the client
   /** @var array $scopes */
-  // Scopes requested by the client  /**
+
+  /**
    * @var Google_Config $config
    */
   private $config;

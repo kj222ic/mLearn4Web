@@ -14,9 +14,11 @@ use Facebook\FacebookSession;
 
 require_once("User.php");
 require_once('./lib/Twitter/twitteroauth/twitteroauth.php');
+require_once("./bin/Scenario.php");
 
 class Login {
     static private $instance = null;
+    protected $scenarioHolder;
     protected $currentUser;
     protected $fbSession;
     protected $fbHelper;
@@ -34,7 +36,7 @@ class Login {
             if (session_id() == "") {
                 session_start();
             }
-            if (isset($_SESSION['singeltonLoginInstance']) && !isset($_GET['logout'])) {
+            if (false && isset($_SESSION['singeltonLoginInstance']) && !isset($_GET['logout'])) {
                 self::$instance = unserialize($_SESSION['singeltonLoginInstance']);
                 if (isset($_GET['code'])) {
                     /*
@@ -66,6 +68,8 @@ class Login {
             }else{
                 self::$instance = new self;
                 self::$instance->currentUser = new User();
+
+                self::$instance->scenarioHolder = ScenarioHolder::getInstance();
 
                 // create Google client
                 $client = new Google_Client();
@@ -167,6 +171,13 @@ class Login {
     public function getFbHelper()
     {
         return $this->fbHelper;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getScenarioHolder(){
+        return $this->scenarioHolder;
     }
 
     private function getUserResourcesFromFacebook(){
