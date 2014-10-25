@@ -6,6 +6,7 @@
  * Time: 20:55
  * To change this template use File | Settings | File Templates.
  */
+
 require_once("autoload.php");
 require_once("./bin/Config.php");
 require_once("./bin/Login.php");
@@ -59,30 +60,45 @@ $user = $login->getUser();
 <!DOCTYPE HTML>
 <html class="<?php echo ($user->isVerified()==true)?$user->getRole():"" ?>">
     <head>
-        <!link href="css/main.css" type="text/css" rel="stylesheet">
+        <link href="css/main.css" type="text/css" rel="stylesheet">
     </head>
     <body>
-        <header>
-            <h1>Hello <?php echo ($user->isVerified()==true)?$user->getUsername():"Stranger"?></h1>
-            <div>
-                <?php if($user->isVerified()==true){
-                    echo "<span>Role :".$user->getRole()."</span>";
-                    echo "<span>ID :".$user->getProfileId()."</span>";
+        <div class="body_frame">
+            <header>
+                <h1>mLearn4Web</h1>
+                <div class="user_info">
+                    <?php
+                        if($user->isVerified()==true){
+                            echo "<span>Hello ".$user->getUsername()."</span>";
+                            echo "<span>Role: ".$user->getRole()."</span>";
+                            echo "<span>ID: ".$user->getProfileId()."</span>";
+                        }
+                        echo $login;
+                    ?>
+                </div>
+                <ul class="nav">
+                    <?php
 
-                }?>
-            </div>
-            <ul class="nav">
-                <?php echo $login ?>
-            </ul>
-        </header>
-        <section>
-        <?php
-            isset($_GET["site"])?:$_GET["site"]="";
-            switch($_GET["site"]){
-                case "scenario" : include("scenario.php"); break;
-                case "" : include("scenarios.php"); break;
-            }
-        ?>
-        </section>
+                        echo "<li><a href='?page=scenario'>Scenario</a></li>";
+                        if($user->isVerified()==true) {
+                            echo "<li><a href='?page=media'>Media</a></li>";
+                        }
+                    ?>
+                </ul>
+            </header>
+            <section>
+            <?php
+                isset($_GET["page"])?$page=$_GET["page"]:$page="";
+                switch($page){
+                    case "scenario" : include("./view/scenario.php"); break;
+                    case "media" :
+                        if($user->isVerified()==true)
+                            include("./view/media.php");
+                        break;
+                    case "" : break;
+                }
+            ?>
+            </section>
+        </div>
     </body>
 </html>

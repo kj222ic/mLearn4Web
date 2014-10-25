@@ -73,11 +73,6 @@ class dbConnector
         }
     }
 
-    private function getRoleByName($name){
-        $sql = "SELECT * FROM Role WHERE Role.name = '$name'";
-        return $this->fetchAssoc($sql);
-    }
-
     /**
      * @description Runs a SQL and fetch the result to an array
      * @param $sql
@@ -93,6 +88,18 @@ class dbConnector
             return $retArray;
         }
         return $qry;
+    }
+
+    private function get($table,$t_term,$value){
+        $term = $table."_".$t_term;
+        $sql = "SELECT * FROM $table WHERE $term = '$value'";
+        return $this->fetchAssoc($sql);
+    }
+
+
+    private function getRoleByName($name){
+        $sql = "SELECT * FROM Role WHERE Role.name = '$name'";
+        return $this->fetchAssoc($sql);
     }
 
     private function getRoleById($id){
@@ -121,6 +128,31 @@ class dbConnector
     private function addAccountRole($accID,$roleID){
         $sql = "INSERT INTO Account_Role (Account_id,Role_id)
                         VALUES ('$accID','$roleID')";
+        return mysql_query($sql);
+    }
+
+    private function getMediaByID($id){
+        $sql = "SELECT * FROM Media WHERE Media_id = '$id' ORDER BY Version DESC";
+        return $this->fetchAssoc($sql);
+    }
+
+    private function getMediaByScenarioID($id){
+        $sql = "SELECT * FROM Media WHERE Scenario_id = '$id' ORDER BY Version DESC";
+        return $this->fetchAssoc($sql);
+    }
+
+    //SCE ScenarioCollectionElement
+    private function getMediaBySCEID($sID,$cID,$eID){
+        $sql = "SELECT * FROM Media WHERE Scenario_id = '$sID'
+                AND Collection_id = '$cID'
+                AND Element_id = '$eID'
+                ORDER BY Version DESC";
+        return $this->fetchAssoc($sql);
+    }
+
+    private function addMedia($sID,$cID,$eID,$v,$userID,$pID=null,$title,$type="image",$file){
+        $sql = "INSERT INTO Media (Scenario_id, Collection_id, Element_id, Version, Owner, Parent_id, title, Type, file)
+                VALUES ('$sID','$cID','$eID','$v','$userID','$pID','$title','$type','$file')";
         return mysql_query($sql);
     }
 

@@ -13,8 +13,7 @@ use Facebook\FacebookRequestException;
 use Facebook\FacebookSession;
 
 require_once("User.php");
-require_once('./lib/Twitter/twitteroauth/twitteroauth.php');
-require_once("./bin/Scenario.php");
+require_once("Scenario.php");
 
 class Login {
     static private $instance = null;
@@ -36,7 +35,7 @@ class Login {
             if (session_id() == "") {
                 session_start();
             }
-            if (false && isset($_SESSION['singeltonLoginInstance']) && !isset($_GET['logout'])) {
+            if (isset($_SESSION['singeltonLoginInstance']) && !isset($_GET['logout'])) {
                 self::$instance = unserialize($_SESSION['singeltonLoginInstance']);
                 if (isset($_GET['code'])) {
                     /*
@@ -100,7 +99,7 @@ class Login {
      */
     public function __toString(){
         if ($this->currentUser->isVerified()) {
-            $output = "";
+            $output = "<ul>";
             $logoutLink = "";
             switch($this->getUser()->getRole()){
                 case "student":
@@ -121,6 +120,7 @@ class Login {
             $output .= '<li><a href="'.$this->googleHelper->createAuthUrl().'">Google login</a></li>';
             $output .= '<li><a href="'.$this->createTwitterUrl().'">Twitter login</a></li>';
         }
+        $output .= "</ul>";
         return $output;
     }
 

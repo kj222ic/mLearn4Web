@@ -7,6 +7,9 @@
  */
 
 require_once("mLearn4WebAPI.php");
+require_once("Media.php");
+
+/* TODO create a DOM */
 
 class ScenarioHolder{
     private $scenarios = array();
@@ -43,14 +46,30 @@ class ScenarioHolder{
 
                     $currentScenario->addDataCollection($currentDataCollection);
 
+                    $id = 0;
                     foreach($scenario->screenData as $screenKey=>$tmpScreen){
+
                         foreach($tmpScreen->screenElements as $elementKey=>$tmpElements){
                             $currentElement = new Element(
                                 empty($tmpElements->title)?"":$tmpElements->title,
                                 $tmpElements->type,
                                 $tmpElements->required,
-                                $elementKey+1
+                                ++$id
                                 );
+                            if($tmpElements->type == "image"){
+                                $media = new Media(
+                                    $currentScenario->getScenarioID(),
+                                    $currentDataCollection->getId(),
+                                    $currentElement->getId(),
+                                    0,
+                                    null,
+                                    null,
+                                    $currentElement->getTitle(),
+                                    null,
+                                    $currentElement->getType()
+                                    );
+                                $currentElement->setMedia($media);
+                            }
                             $currentDataCollection->addElement($currentElement);
                         }
                     }
@@ -66,6 +85,7 @@ class ScenarioHolder{
                     }
                 }
                 array_push(self::$instance->scenarios, $currentScenario);
+
             }
         }
         return self::$instance;
@@ -73,6 +93,14 @@ class ScenarioHolder{
 
     public function getScenarios(){
         return $this->scenarios;
+    }
+
+    public function getScenarioByID($id){
+        foreach($this->scenarios as $scenario){
+            if($scenario->getScenarioID()==$id)
+                return $scenario;
+        }
+        return null;
     }
 }
 
@@ -99,6 +127,70 @@ class Scenario {
         array_push($this->dataCollection, $collection);
     }
 
+    public function getCollectionByID($id){
+        foreach($this->dataCollection as $collection){
+            if($collection->getId()==$id)
+                return $collection;
+        }
+        return null;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTitle()
+    {
+        return $this->title;
+    }
+
+    /**
+     * @param mixed $title
+     */
+    public function setTitle($title)
+    {
+        $this->title = $title;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getDescription()
+    {
+        return $this->description;
+    }
+
+    /**
+     * @param mixed $description
+     */
+    public function setDescription($description)
+    {
+        $this->description = $description;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getScenarioID()
+    {
+        return $this->scenarioID;
+    }
+
+    /**
+     * @param mixed $scenarioID
+     */
+    public function setScenarioID($scenarioID)
+    {
+        $this->scenarioID = $scenarioID;
+    }
+
+    /**
+     * @return array
+     */
+    public function getDataCollection()
+    {
+        return $this->dataCollection;
+    }
+
 }
 
 class DataCollection {
@@ -121,18 +213,80 @@ class DataCollection {
         $this->version = $version;
     }
 
-    public function addElement($element){
-        array_push($this->elements , $element);
+    public function addElement($element){array_push($this->elements , $element);}
+
+    public function getElementByID($id){
+        foreach($this->elements as $element){
+            if($element->getId()==$id)
+                return $element;
+        }
+        return null;
     }
 
-    public function getElements(){
-        return $this->elements;
-    }
-
+    /**
+     * @return array Elements
+     */
+    public function getElements(){return $this->elements;}
 
     public function addElementValue($id,$value){
-        $this->elements[$id-1]->addValue($value);
+        $this->elements[$id-1]->setValue($value);
+
+
+        if($this->elements[$id-1]->getType() =="image"){
+            // save media only if it has a valid extension
+            if(preg_match("(.(jpg|jpeg|png|gif)$)i",$value)){
+                !preg_match("(^\/)i",$value)?$value="/".$value:null;
+                $media = $this->elements[$id-1]->getMedia();
+                $media->setFile(config::$LEARN_API_URL.$value);
+                $this->elements[$id-1]->setMedia($media);
+                $media->update();
+            }else{
+                $this->elements[$id-1]->setMedia(null);
+            }
+        }
+        //http://stackoverflow.com/questions/321158/checking-for-file-extensions-in-php-with-regular-expressions
+
     }
+
+    /**
+     * @return String
+     */
+    public function getGroupname(){return $this->groupname;}
+
+    /**
+     * @param String $groupname
+     */
+    public function setGroupname($groupname){$this->groupname = $groupname;}
+
+    /**
+     * @return String
+     */
+    public function getTimestamp(){return $this->timestamp;}
+
+    /**
+     * @param String $timestamp
+     */
+    public function setTimestamp($timestamp){$this->timestamp = $timestamp;}
+
+    /**
+     * @return Integer
+     */
+    public function getVersion(){return $this->version;}
+
+    /**
+     * @param Integer $version
+     */
+    public function setVersion($version){$this->version = $version;}
+
+    /**
+     * @return Integer
+     */
+    public function getId(){return $this->_id;}
+
+    /**
+     * @param Integer $id
+     */
+    public function setId($id){$this->_id = $id;}
 }
 
 class Element {
@@ -141,6 +295,7 @@ class Element {
     private $required;
     private $id;
     private $value;
+    private $media;
 
     /**
      * @param $title
@@ -156,8 +311,63 @@ class Element {
         $this->id = $id;
         $this->value = $value;
     }
+    /**
+     * @return String
+     */
+    public function getTitle(){return $this->title;}
 
-    public function addValue($value){
-        $this->value = $value;
-    }
+    /**
+     * @param String $title
+     */
+    public function setTitle($title){$this->title = $title;}
+
+    /**
+     * @return String
+     */
+    public function getType(){return $this->type;}
+
+    /**
+     * @param String $type
+     */
+    public function setType($type){$this->type = $type;}
+
+    /**
+     * @return boolean
+     */
+    public function getRequired(){return $this->required;}
+
+    /**
+     * @param Boolean $required
+     */
+    public function setRequired($required){$this->required = $required;}
+
+    /**
+     * @return Integer
+     */
+    public function getId(){return $this->id;}
+
+    /**
+     * @param mixed $id
+     */
+    public function setId($id){$this->id = $id;}
+
+    /**
+     * @return String
+     */
+    public function getValue(){return $this->value;}
+
+    /**
+     * @param String $value
+     */
+    public function setValue($value){$this->value = $value;}
+
+    /**
+     * @return Media
+     */
+    public function getMedia(){return $this->media;}
+
+    /**
+     * @param Media $media
+     */
+    public function setMedia($media){$this->media = $media;}
 }

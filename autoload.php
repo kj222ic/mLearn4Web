@@ -100,3 +100,5 @@ function google_api_php_client_autoload($className) {
 }
 
 spl_autoload_register('google_api_php_client_autoload');
+
+require_once('./lib/Twitter/twitteroauth/twitteroauth.php');

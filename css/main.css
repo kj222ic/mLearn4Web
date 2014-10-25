@@ -1,0 +1,38 @@
+html,body{
+    padding: 0;
+    margin: 0;
+
+    background-color: yellowgreen;
+}
+
+img{
+    width: 300px;
+}
+
+header{
+    height: 200px;
+    margin: 0 20px;
+}
+
+h1{
+    padding: 0;
+    margin: 0;
+    text-align: center;
+}
+.body_frame{
+    width: 800px;
+    margin: 0 auto;
+    background-color: beige;
+}
+.user_info{
+    width: 200px;
+    float: right;
+}
+.user_info span{
+    display: block;
+}
+
+section{
+    padding: 0 20px;
+}
+
