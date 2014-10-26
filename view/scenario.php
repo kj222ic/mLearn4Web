@@ -1,8 +1,3 @@
-
-
-
-
-
 <?php
 /**
  * Created by PhpStorm.
@@ -13,9 +8,10 @@
 //src http://top-frog.com/2006/09/30/setting_the_base_directory_in_php/
 define('DOCUMENT_ROOT', dirname(realpath(__FILE__)).'/');
 
-require_once(DOCUMENT_ROOT."../bin/mLearn4WebAPI.php");
+require_once(DOCUMENT_ROOT."../code/mLearn4WebAPI.php");
 
-$scenarios = $login->getScenarioHolder()->getScenarios();
+$scenarioHolder = $login->getScenarioHolder();
+$scenarios = $scenarioHolder->getScenarios();
 $output = "";
 
 if(!isset($_GET["id"])){

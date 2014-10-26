@@ -1403,7 +1403,7 @@ class Google_Service_Directory_Chromeosdevices_Resource extends Google_Service_R
     * used
    * @opt_param string query
    * Search string in the format given at
-    * http://support.google.com/chromeos/a/bin/answer.py?hl=en=1698333
+    * http://support.google.com/chromeos/a/code/answer.py?hl=en=1698333
    * @return Google_Service_Directory_ChromeOsDevices
    */
   public function listChromeosdevices($customerId, $optParams = array())
@@ -1818,7 +1818,7 @@ class Google_Service_Directory_Mobiledevices_Resource extends Google_Service_Res
     * used
    * @opt_param string query
    * Search string in the format given at
-    * http://support.google.com/a/bin/answer.py?hl=en=1408863#search
+    * http://support.google.com/a/code/answer.py?hl=en=1408863#search
    * @return Google_Service_Directory_MobileDevices
    */
   public function listMobiledevices($customerId, $optParams = array())

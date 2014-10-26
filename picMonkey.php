@@ -5,9 +5,9 @@
  * Date: 24.10.2014
  * Time: 22:15
  */
-require_once("bin/dbConnector.php");
-require_once("bin/Login.php");
-require_once("bin/Config.php");
+require_once("code/dbConnector.php");
+require_once("code/Login.php");
+require_once("code/Config.php");
 
 $login = Login::getInstance();
 $user = $login->getUser();

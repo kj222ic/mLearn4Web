@@ -7,83 +7,82 @@
  */
 define('DOCUMENT_ROOT', dirname(realpath(__FILE__)).'/');
 
-require_once(DOCUMENT_ROOT."../bin/Media.php");
-
-$url= "http://www.picmonkey.com/service";
-$param = array(
-    "_apikey"       => Config::$PICMONKEY_KEY,
-    "_export_agent" => "browser",
-    "_export"       => urlencode(Config::$MY_URL."picMonkey.php"),
-    "_export_method"=> "GET"
-);
-$get = "?";
-foreach($param as $key=>$value){
-    $get .= "$key=$value&";
-}
-$staticQuery = $url.$get;
+require_once(DOCUMENT_ROOT."../code/Media.php");
 
 
-$scenarios = $login->getScenarioHolder()->getScenarios();
+
+$scenarioHolder = $login->getScenarioHolder();
+$scenarios = $scenarioHolder->getScenarios();
 $output = "";
 
-if(isset($_GET["scenarioID"]) && isset($_GET["elementID"])){
+if(isset($_GET["sID"]) && isset($_GET["cID"]) && isset($_GET["eID"])) {
     /* CERTAIN MEDIA FROM SCENARIO */
 
-    foreach($scenarios as $scenario) {
-        if ($scenario->getScenarioID() != $_GET["scenarioID"]) {
-            continue;
-        } else {
-            foreach ($scenario->getDataCollection() as $collection) {
-                foreach ($collection->getElements() as $element) {
-                    if ($element->getID() != $_GET["elementID"]) {
-                        continue;
-                    } else {
-                        $media = $element->getMedia();
+    $scenario = $scenarioHolder->getScenarioByID($_GET["sID"]);
+    $collection = $scenario->getCollectionByID($_GET["cID"]);
+    $element = $collection->getElementByID($_GET["eID"]);
+    $media = $element->getMedia();
+    empty($collection)?exit:null;
 
-                        $output .= "<div>";
-                        $output .= "<h3>" . $element->getTitle() . "</h3>";
-                        $output .= $media->__toString();
+    $output = "<h3>".$scenario->getTitle()."</h3>";
+    $output .=  "<h4>".$collection->getGroupname()."</h4>";
 
-                        //image editing
-                        $img = urlencode($media->getFile());
-                        $title = "&sID=".$scenario->getScenarioID()." &cID=".$collection->getID()." &eID=".$media->getElementID();
-                        $query = $staticQuery."&_import=$img&_title=$title";
+    $output .= "<div>";
+    $output .= "<h5>" . $element->getTitle()."</h5>";
+    $output .= $media->__toString();
 
-                        $output .=  "<a target='_blank' href='$query'>edit Image</a>";
-                        $output .= "</div>";
-                    }
-                }
-            }
-        }
+    $output .= "<a target='_blank' href='" . $media->getMediaEditLink() . "'>edit Image</a>";
+    $output .= "</div>";
+
+}elseif(isset($_GET["sID"]) && isset($_GET["cID"])){
+
+    $scenario = $scenarioHolder->getScenarioByID($_GET["sID"]);
+    $collection = $scenario->getCollectionByID($_GET["cID"]);
+    empty($collection)?exit:null;
+
+    $output = "<h3>".$scenario->getTitle()."</h3>";
+    $output .=  "<h4>".$collection->getGroupname()."</h4>";
+
+    foreach($collection->getElements() as $element){
+        $media = $element->getMedia();
+        if(empty($media)) continue;
+
+        $link = "?page=".$_GET['page']."&sID=".$media->getScenarioID()."&cID=".$media->getCollectionID()."&eID=".$media->getElementID();
+
+        $output .= "<div>";
+        $output .=      "<h5><a href='$link'>".$element->getTitle()."</a></h5>";
+        $output .=      $media->__toString();
+        $output .=      "<a target='_blank' href='".$media->getMediaEditLink()."'>edit Image</a>";
+        $output .= "</div>";
     }
-}elseif(isset($_GET["scenarioID"])){
+
+}elseif(isset($_GET["sID"])){
     /* MEDIA FROM SCENARIO */
 
-    foreach($scenarios as $scenario){
-        if($scenario->getScenarioID()!=$_GET["scenarioID"]){
-            continue;
-        }else{
-            $output = "<h2>".$scenario->getTitle()."</h2>";
-            foreach($scenario->getDataCollection() as $collection){
-                foreach($collection->getElements() as $element){
-                    $media = $element->getMedia();
-                    if(empty($media)) continue;
+    $scenario = $scenarioHolder->getScenarioByID($_GET["sID"]);
+    empty($scenario)?exit:null;
 
-                    $output .= "<div>";
-                    $output .=      "<h3>".$element->getTitle()."</h3>";
-                    $output .=      $media->__toString();
+    $output = "<h3>".$scenario->getTitle()."</h3>";
 
-                    //image editing
-                    $img = urlencode($media->getFile());
-                    $title = "&sID=".$scenario->getScenarioID()." &cID=".$collection->getID()." &eID=".$media->getElementID();
-                    $query = $staticQuery."&_import=$img&_title=$title";
+    foreach($scenario->getDataCollection() as $collection){
 
-                    $output .=  "<a target='_blank' href='$query'>edit Image</a>";
-                    $output .= "</div>";
-                }
-            }
+        $link = "?page=".$_GET['page']."&sID=".$scenario->getScenarioID()."&cID=".$collection->getId();
+        $output .=  "<h4><a href='$link'>".$collection->getGroupname()."</a></h4>";
+
+        foreach($collection->getElements() as $element){
+            $media = $element->getMedia();
+            if(empty($media)) continue;
+
+            $link = "?page=".$_GET['page']."&sID=".$media->getScenarioID()."&cID=".$media->getCollectionID()."&eID=".$media->getElementID();
+
+            $output .= "<div>";
+            $output .=      "<h5><a href='$link'>".$element->getTitle()."</a></h5>";
+            $output .=      $media->__toString();
+            $output .=      "<a target='_blank' href='".$media->getMediaEditLink()."'>edit Image</a>";
+            $output .= "</div>";
         }
     }
+
 }else{
     /* ALL MEDIA */
 
@@ -91,21 +90,25 @@ if(isset($_GET["scenarioID"]) && isset($_GET["elementID"])){
     $output .= "<div>";
     // O(n³)
     foreach($scenarios as $scenario){
+
+        $link = "?page=".$_GET['page']."&sID=".$scenario->getScenarioID();
+        $output .=  "<h3><a href='$link'>".$scenario->getTitle()."</a></h3>";
+
         foreach($scenario->getDataCollection() as $collection){
+
+            $link = "?page=".$_GET['page']."&sID=".$scenario->getScenarioID()."&cID=".$collection->getId();
+            $output .=  "<h4><a href='$link'>".$collection->getGroupname()."</a></h4>";
+
             foreach($collection->getElements() as $element){
                 $media = $element->getMedia();
                 if(empty($media)) continue;
 
+                $link = "?page=".$_GET['page']."&sID=".$media->getScenarioID()."&cID=".$media->getCollectionID()."&eID=".$media->getElementID();
+
                 $output .= "<div>";
-                $output .=      "<h3>".$element->getTitle()."</h3>";
+                $output .=      "<h5><a href='$link'>".$element->getTitle()."</a></h5>";
                 $output .=      $media->__toString();
-
-                //image editing
-                $img = urlencode($media->getFile());
-                $title = "&sID=".$scenario->getScenarioID()."&cID=".$collection->getID()."&eID=".$media->getElementID();
-                $query = $staticQuery."&_import=$img&_title=$title";
-
-                $output .=  "<a target='_blank' href='$query'>edit Image</a>";
+                $output .=      "<a target='_blank' href='".$media->getMediaEditLink()."'>edit Image</a>";
                 $output .= "</div>";
             }
         }

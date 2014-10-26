@@ -7,12 +7,15 @@
  * To change this template use File | Settings | File Templates.
  */
 
+date_default_timezone_set('UTC');
+
+
 require_once("autoload.php");
-require_once("./bin/Config.php");
-require_once("./bin/Login.php");
-require_once("./bin/dbConnector.php");
-require_once("./bin/mLearn4WebAPI.php");
-require_once("./bin/Media.php");
+require_once("./code/Config.php");
+require_once("./code/Login.php");
+require_once("./code/dbConnector.php");
+require_once("./code/mLearn4WebAPI.php");
+require_once("./code/Media.php");
 
 $login = Login::getInstance();
 $user = $login->getUser();

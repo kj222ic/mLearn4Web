@@ -55,6 +55,28 @@ class Media{
         }
     }
 
+    public function getMediaEditLink(){
+        //image editing
+        $img = urlencode($this->file);
+        $title = "&sID=".$this->scenarioID."&cID=".$this->collectionID."&eID=".$this->elementID;
+        return $this->picMonkeyUrlBase()."&_import=$img&_title=$title";
+    }
+
+    private static function picMonkeyUrlBase(){
+        $url= "http://www.picmonkey.com/service";
+        $param = array(
+            "_apikey"       => Config::$PICMONKEY_KEY,
+            "_export_agent" => "browser",
+            "_export"       => urlencode(Config::$MY_URL."picMonkey.php"),
+            "_export_method"=> "GET"
+        );
+        $get = "?";
+        foreach($param as $key=>$value){
+            $get .= "$key=$value&";
+        }
+        return $url.$get;
+    }
+
     public function __toString(){
         $output = "<img cID='$this->collectionID' eID='$this->elementID' sID='$this->scenarioID' title='$this->title' src='$this->file'/>";
         return $output;
